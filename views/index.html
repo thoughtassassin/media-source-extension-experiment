@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Concatenate Videos with Media Source Extensions</title>
+  </head>
+  <body>
+    <video controls width="640" height="480"></video>
+
+    <script>
+      const addSourceBufferWhenOpen = (
+        mediaSource,
+        mimeStr,
+        mode = "segments"
+      ) => {
+        return new Promise((res, rej) => {
+          const getSourceBuffer = () => {
+            try {
+              const sourceBuffer = mediaSource.addSourceBuffer(mimeStr);
+              sourceBuffer.mode = mode;
+              res(sourceBuffer);
+            } catch (e) {
+              rej(e);
+            }
+          };
+          if (mediaSource.readyState === "open") {
+            getSourceBuffer();
+          } else {
+            mediaSource.addEventListener("sourceopen", getSourceBuffer);
+          }
+        });
+      };
+
+      (async () => {
+        const videoElement = document.querySelector("video");
+        const vidClips = [
+          "/videos/ForBiggerBlazes_dashinit.mp4",
+          "/videos/ForBiggerFun_dashinit.mp4",
+          "/videos/ForBiggerJoyrides_dashinit.mp4",
+        ];
+        // Shuffle clips. If you reload the page, you will get a random order of videos!
+        // shuffleArr(vidClips);
+
+        // Get video clips as buffers
+        const clipsToAppend = await Promise.all(
+          vidClips.map(async (vidUrl) => {
+            return (await fetch(vidUrl)).arrayBuffer();
+          })
+        );
+
+        // Normal setup, with MediaSource, Object URL, and prepped SourceBuffer
+        const mediaSource = new MediaSource();
+
+        videoElement.src = URL.createObjectURL(mediaSource);
+        // mode = sequence
+        const sourceBuffer = await addSourceBufferWhenOpen(
+          mediaSource,
+          'video/mp4; codecs="avc1.42E01E, mp4a.40.2"',
+          "sequence"
+        );
+
+        /**
+         * Pointer to last vid appended out of source list
+         */
+        let clipIndex = 0;
+        sourceBuffer.onupdateend = () => {
+          if (clipIndex < vidClips.length - 1) {
+            clipIndex++;
+            sourceBuffer.appendBuffer(clipsToAppend[clipIndex]);
+          } else {
+            // Done!
+            mediaSource.endOfStream();
+            videoElement.play();
+          }
+        };
+
+        // This will kick off event listener chain above
+        sourceBuffer.appendBuffer(clipsToAppend[clipIndex]);
+
+        // Debug Info
+        console.log({
+          sourceBuffer,
+          mediaSource,
+          videoElement,
+        });
+      })();
+    </script>
+  </body>
+</html>
