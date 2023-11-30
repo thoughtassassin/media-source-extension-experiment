@@ -6,7 +6,7 @@ https://github.com/joshuatz/mediasource-append-examples/blob/main/standard/index
 
 I noticed that ChatGPT's script did work with fragmented mp4 files in Chrome. No other browser worked. So I tried the above script mentioned while formating mp4 files that are fragmented with GPAC's Mp4box with this command:
 
-```MP4Box -dash 1000 -rap -frag-rap or<your-file-here>```
+```MP4Box -dash 1000 -rap -frag-rap <your-file-here>```
 
 This seems to work in all of the browsers I tested in so far (Firefox, Google and Safari in macOS Ventura 13.5.2).
 
