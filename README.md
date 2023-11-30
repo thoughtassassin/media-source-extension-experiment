@@ -12,6 +12,7 @@ This seems to work in all of the browsers I tested in so far (Firefox, Google an
 
 To run the app:
 
-<p><code>npm install<br />npm start</code></p>
+<p><code>npm install</code><br />
+<code>npm start</code></p>
 
 To add more videos move mp4 files into the videos directory, run the command above and add the path to the outputed video file into the array of `vidClips` on line 35 in /views/index.html.
